@@ -27,6 +27,11 @@
 ;;;; add-component
 (define-constant simple-component-package-name "com.google.appinventor.components.runtime")
 
+;;;; Code for assignment 4
+;;;; Scheme code for not-not block
+(define (yail-not-not foo) (not (not foo)))
+
+
 ;;; (gen-simple-component-type Label)
 ;;; ==> "com.google.appinventor.components.runtime.Label"
 (define-syntax gen-simple-component-type
