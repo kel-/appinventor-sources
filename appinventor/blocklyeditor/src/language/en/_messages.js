@@ -246,6 +246,12 @@ Blockly.LANG_LOGIC_NEGATE_INPUT_NOT = 'not';
 Blockly.LANG_LOGIC_NEGATE_TOOLTIP = 'Returns true if the input is false.\n' +
   'Returns false if the input is true.';
 
+// Assignmet 4 code - not-not component
+Blockly.LANG_LOGIC_NEGATE_NEGATE_HELPURL = 'http://appinventor.mit.edu/explore/ai2/support/blocks/logic#notnot';
+Blockly.LANG_LOGIC_NEGATE_NEGATE_INPUT_NOT = 'notnot';
+Blockly.LANG_LOGIC_NEGATE_NEGATE_TOOLTIP = 'Returns true if the input is true.\n' +
+  'Returns false if the input is false.';
+
 Blockly.LANG_LOGIC_BOOLEAN_TRUE_HELPURL = 'http://appinventor.mit.edu/explore/ai2/support/blocks/logic#true';
 Blockly.LANG_LOGIC_BOOLEAN_FALSE_HELPURL = 'http://appinventor.mit.edu/explore/ai2/support/blocks/logic#false';
 Blockly.LANG_LOGIC_BOOLEAN_TRUE = 'true';
@@ -606,10 +612,14 @@ Blockly.LANG_LISTS_POSITION_IN_INPUT_LIST = 'list';
 Blockly.LANG_LISTS_POSITION_IN_TOOLTIP = 'Find the position of the thing in the list. If it\'s not in '
   + 'the list, return 0.';
 
+Blockly.LANG_LISTS_PICK_ITEM_FIRST_TOOLTIP = 'Pick the first item from the list.';
+Blockly.LANG_LISTS_PICK_ITEM_LAST_TOOLTIP = 'Pick the last item from the list.';
+
 Blockly.LANG_LISTS_PICK_RANDOM_ITEM_HELPURL = 'http://appinventor.mit.edu/explore/ai2/support/blocks/lists#pickrandomitem';
 Blockly.LANG_LISTS_PICK_RANDOM_TITLE_PICK_RANDOM = 'pick a random item';
 Blockly.LANG_LISTS_PICK_RANDOM_ITEM_INPUT_LIST = 'list';
 Blockly.LANG_LISTS_PICK_RANDOM_TOOLTIP = 'Pick an item at random from the list.';
+
 
 Blockly.LANG_LISTS_REPLACE_ITEM_HELPURL = 'http://appinventor.mit.edu/explore/ai2/support/blocks/lists#replace';
 Blockly.LANG_LISTS_REPLACE_ITEM_TITLE_REPLACE = 'replace list item';

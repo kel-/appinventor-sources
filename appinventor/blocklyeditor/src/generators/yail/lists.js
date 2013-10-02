@@ -198,8 +198,10 @@ Blockly.Yail.lists_position_in = function() {
   return [ code, Blockly.Yail.ORDER_ATOMIC ];
 };
 
-Blockly.Yail.lists_pick_random_item = function() {
-  // Pick random item
+
+Blockly.Yail.lists_pick_an_item = function() {
+  // Pick an item in a list. Either first, random, or last.
+  var argument0 = this.getTitleValue('OP');
   var argument0 = Blockly.Yail.valueToCode(this, 'LIST', Blockly.Yail.ORDER_NONE) || Blockly.Yail.emptyListCode;
   var code = Blockly.Yail.YAIL_CALL_YAIL_PRIMITIVE + "yail-list-pick-random" + Blockly.Yail.YAIL_SPACER;
   code = code + Blockly.Yail.YAIL_OPEN_COMBINATION + Blockly.Yail.YAIL_LIST_CONSTRUCTOR + Blockly.Yail.YAIL_SPACER;

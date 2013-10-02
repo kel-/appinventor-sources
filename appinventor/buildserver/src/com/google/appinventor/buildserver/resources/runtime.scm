@@ -1540,6 +1540,8 @@ Block name               Kawa implementation
 - is in list?             (yail-list-member? object yail-list)
 - position in list       (yail-list-index item list)
 - for each                (foreach variable bodyform yail-list) [macro] [in control drawer]
+- pick first item         (yail-list-pick-first yail-list)
+- pick last item          (yail-list-pick-last yail-list)
 - pick random item        (yail-list-pick-random yail-list)
 - is list?                (yail-list? object)
 - is empty?               (yail-list-empty? yail-list)
@@ -1836,6 +1838,24 @@ list, use the make-yail-list constructor with no arguments.
 (define (yail-list-member? object yail-list)
   (let ((result (member object (yail-list-contents yail-list) yail-equal?)))
     (if result #t #f)))
+
+;; Returns the first element in a the list
+(define (yail-list-pick-first yail-list)
+  (if(yail-list-empty? yail-list)
+    (signal-runtime-error
+      (format #f "Pick first item: Attempt to pick first item from an empty list")
+      "Invalid list operation"))
+  (yail-list-get-item yail-list
+              (yail-list-get-item yail-list 1)))
+
+;; Returns the last element in a list
+  (define (yail-list-pick-last yail-list)
+    (if (yail-list-empty? Yail-list)
+      (signal-runtime-error
+        (format #f "Pick last item: Attempt to pick item from an empty list")
+          "Invalid list operation"))
+  (yail=yail-list-get-item yail-list
+              (yail-list-length yail-list)))
 
 
 ;; Returns an element chosen at random from the list
