@@ -268,7 +268,11 @@ Blockly.ReplMgr.putYail = (function() {
                         if (work.failure) {
                             work.failure("Network Connection Error");
                         }
-                        var dialog = new Blockly.ReplMgr.Dialog("Network Error", "Network Error Communicating with Companion.<br />Try restarting the Companion and re-connecting", "OK", 0, function() { dialog.hide(); });
+                        var dialog = new Blockly.ReplMgr.Dialog("Network Error", "Network Error Communicating with Companion.<br />Try restarting the Companion and reconnecting", "OK", 0,
+                            function() {
+                                dialog.hide();
+                                context.hardreset(context.formName);
+                            });
                         engine.resetcompanion();
                     }
                 }
@@ -303,7 +307,9 @@ Blockly.ReplMgr.putYail = (function() {
                     return;
                 }
                 if (this.readyState == 4) { // Old Companion, doesn't do CORS so we fail to talk to it
-                    var dialog = new Blockly.ReplMgr.Dialog("Network Error", "Network Error Communicating with Companion.<br />Try restarting the Companion and re-connecting", "OK", 0, function() { dialog.hide(); });
+                    var dialog = new Blockly.ReplMgr.Dialog("Network Error", "Network Error Communicating with Companion.<br />Try restarting the Companion and reconnecting", "OK", 0, function() {
+                        dialog.hide();
+                    });
                     engine.resetcompanion();
                     return;
                 }
@@ -342,6 +348,9 @@ Blockly.ReplMgr.putYail = (function() {
             rs.state = Blockly.ReplMgr.rsState.IDLE;
             rs.connection = null;
             context.resetYail();
+//   hardreset is now done in the handler for the network error dialog OK
+//   button.
+//          context.hardreset(context.formName); // kill adb and emulator
             rs.didversioncheck = false;
             window.parent.BlocklyPanel_indicateDisconnect();
         },
@@ -485,9 +494,9 @@ Blockly.ReplMgr.startAdbDevice = function(rs, usb) {
                         console.log("ReplMgr: set device = " + device);
                         pc = 1;                    // Next State
                         if (usb) {
-                            counter = 5;               // Wait five seconds for usb
+                            counter = 6;               // Wait five seconds for usb
                         } else {
-                            counter = 10;              // Wiat ten seconds for the emulator
+                            counter = 21;              // Wait twenty seconds for the emulator
                         }
                         if (udialog) {             // Get rid of dialog he/she plugged in the cable!
                             udialog.hide();
@@ -496,7 +505,7 @@ Blockly.ReplMgr.startAdbDevice = function(rs, usb) {
                     } else {
                         if (first && !usb) { // Need to actually start the thing!
                             var xhr = goog.net.XmlHttp();
-                            xhr.open("GET", "http://localhost:8004/start/", false); // We don't look at the response
+                            xhr.open("GET", "http://localhost:8004/start/", true); // We don't look at the response
                             xhr.send();
                             first = false;
                         } else if (first) { // USB
@@ -526,19 +535,19 @@ Blockly.ReplMgr.startAdbDevice = function(rs, usb) {
                 }
             };
             if (usb) {
-                xhr.open("GET", "http://localhost:8004/ucheck/", false);
+                xhr.open("GET", "http://localhost:8004/ucheck/", true);
             } else {
-                xhr.open("GET", "http://localhost:8004/echeck/", false);
+                xhr.open("GET", "http://localhost:8004/echeck/", true);
             }
             xhr.send();
             break;
         case 1:
+            counter -= 1;
             if (usb) {
                 progdialog.setContent("USB Connected, waiting " + counter + " seconds to ensure all is running.");
             } else {
                 progdialog.setContent("Emulator started, waiting " + counter + " seconds to ensure all is running.");
             }
-            counter -= 1;
             if (counter <= 0) {
                 if (usb) {
                     progdialog.setContent("Starting the Companion App on the connected phone.");
@@ -546,22 +555,44 @@ Blockly.ReplMgr.startAdbDevice = function(rs, usb) {
                     progdialog.setContent("Starting the Companion App in the emulator.");
                 }
                 pc = 2;
-                counter = 10;
+                counter = 6;
                 xhr = goog.net.XmlHttp();
-                xhr.open("GET", "http://localhost:8004/replstart/" + device, false); // Don't look at response
+                xhr.open("GET", "http://localhost:8004/replstart/" + device, true); // Don't look at response
                 xhr.send();
             }
             break;
         case 2:
-            progdialog.setContent("Companion started, waiting " + counter + " seconds to ensure all is running.");
             counter -= 1;
-            if (counter <= 0) {
-                progdialog.hide();
-                rs.state = blockly.rsState.CONNECTED; // Indicate that we are good to go!
+            if (counter > 0) {
+                progdialog.setContent("Companion started, waiting " + counter + " seconds to ensure all is running.");
+            } else {
+                progdialog.setContent("Verifying that the Companion Started....");
+                xhr = goog.net.XmlHttp();
+                xhr.open("GET", rs.versionurl, true);
+                xhr.onreadystatechange = function() {
+                    if (this.readyState == 4) {
+                        if (this.status == 200) {
+                            pc = 4; // We got a response!
+                            return;
+                        } else {
+                            // We didn't work, add some time and go back to state 2
+                            counter = 5; // Wait 5 more seconds
+                            pc = 2;
+                        }
+                    }
+                };
+                xhr.send();
                 pc = 3;
-                clearInterval(interval);
-                window.parent.BlocklyPanel_blocklyWorkspaceChanged(blockly.formName);
             }
+            break;
+        case 3:
+            break;              // We don't do anything in this state
+                                // we are waiting for the version check (noop) to finish
+        case 4:
+            progdialog.hide();
+            rs.state = blockly.rsState.CONNECTED; // Indicate that we are good to go!
+            clearInterval(interval);
+            window.parent.BlocklyPanel_blocklyWorkspaceChanged(blockly.formName);
         }
     }, 1000);                   // We poll once per second
 };
@@ -629,7 +660,7 @@ Blockly.ReplMgr.startRepl = function(already, emulator, usb) {
         }
         this.resetYail();
         window.parent.ReplState.state = this.rsState.IDLE;
-        this.hardreset();       // Tell aiStarter to kill off adb
+        this.hardreset(this.formName);       // Tell aiStarter to kill off adb
     }
 };
 
@@ -787,7 +818,9 @@ Blockly.ReplMgr.putAsset = function(filename, blob) {
     return true;
 };
 
-Blockly.ReplMgr.hardreset = function() {
+Blockly.ReplMgr.hardreset = function(formName) {
+    window.parent.AssetManager_reset(formName); // Reset the notion of what assets
+                                                // are loaded.
     var xhr = goog.net.XmlHttp();
     xhr.open("GET", "http://localhost:8004/reset/", true);
     xhr.onreadystatechange = function() {}; // Ignore errors
