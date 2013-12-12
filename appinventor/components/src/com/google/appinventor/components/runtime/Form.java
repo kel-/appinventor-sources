@@ -139,7 +139,8 @@ public class Form extends Activity
   private final Set<OnResumeListener> onResumeListeners = Sets.newHashSet();
   private final Set<OnPauseListener> onPauseListeners = Sets.newHashSet();
   private final Set<OnDestroyListener> onDestroyListeners = Sets.newHashSet();
-  
+  private final Set<OnStartListener> onStartListeners = Sets.newHashSet();
+
   // AppInventor lifecycle: listeners for the Initialize Event
   private final Set<OnInitializeListener> onInitializeListeners = Sets.newHashSet();
 
@@ -248,14 +249,14 @@ public class Form extends Activity
    */
   @Override
   public boolean onKeyDown(int keyCode, KeyEvent event) {
-    if (keyCode == KeyEvent.KEYCODE_BACK) {      
+    if (keyCode == KeyEvent.KEYCODE_BACK) {
       if (!BackPressed()) {
         boolean handled = super.onKeyDown(keyCode, event);
         AnimationUtil.ApplyCloseScreenAnimation(this, closeAnimType);
         return handled;
       } else {
         return true;
-      }      
+      }
     }
     return super.onKeyDown(keyCode, event);
   }
@@ -264,7 +265,7 @@ public class Form extends Activity
   public boolean BackPressed() {
     return EventDispatcher.dispatchEvent(this, "BackPressed");
   }
-  
+
   // onActivityResult should be triggered in only two cases:
   // (1) The result is for some other component in the app, not this Form itself
   // (2) This page started another page, and that page is closing, and passing
@@ -361,11 +362,11 @@ public class Form extends Activity
   public void registerForOnResume(OnResumeListener component) {
     onResumeListeners.add(component);
   }
-  
+
   /**
    * An app can register to be notified when App Inventor's Initialize
    * block has fired.  They will be called in Initialize().
-   * 
+   *
    * @param component
    */
   public void registerForOnInitialize(OnInitializeListener component) {
@@ -384,6 +385,19 @@ public class Form extends Activity
   public void registerForOnNewIntent(OnNewIntentListener component) {
     onNewIntentListeners.add(component);
   }
+
+  @Override
+  protected void onStart() {
+    super.onStart();
+    Log.i(LOG_TAG, "Form" + formName + " got onStart");
+    for (OnStartListener onStartListener : onStartListeners) {
+      onStartListener.onStart();
+    }
+  }
+
+public void registerForOnStart(OnStartListener component) {
+  onStartListeners.add(component);
+}
 
   @Override
   protected void onPause() {
@@ -503,12 +517,12 @@ public class Form extends Activity
         if (frameLayout != null && frameLayout.getWidth() != 0 && frameLayout.getHeight() != 0) {
           EventDispatcher.dispatchEvent(Form.this, "Initialize");
           screenInitialized = true;
-          
+
           //  Call all apps registered to be notified when Initialize Event is dispatched
           for (OnInitializeListener onInitializeListener : onInitializeListeners) {
             onInitializeListener.onInitialize();
           }
-          
+
         } else {
           // Try again later.
           androidUIHandler.post(this);
@@ -701,9 +715,9 @@ public class Form extends Activity
   /**
    * The requested screen orientation. Commonly used values are
       unspecified (-1), landscape (0), portrait (1), sensor (4), and user (2).  " +
-      "See the Android developer documentation for ActivityInfo.Screen_Orientation for the " + 
+      "See the Android developer documentation for ActivityInfo.Screen_Orientation for the " +
       "complete list of possible settings.
-   * 
+   *
    * ScreenOrientation property getter method.
    *
    * @return  screen orientation
@@ -711,7 +725,7 @@ public class Form extends Activity
   @SimpleProperty(category = PropertyCategory.APPEARANCE,
       description = "The requested screen orientation. Commonly used values are" +
       " unspecified (-1), landscape (0), portrait (1), sensor (4), and user (2).  " +
-      "See the Android developer docuemntation for ActivityInfo.Screen_Orientation for the " + 
+      "See the Android developer docuemntation for ActivityInfo.Screen_Orientation for the " +
       "complete list of possible settings.")
   public String ScreenOrientation() {
     switch (getRequestedOrientation()) {
