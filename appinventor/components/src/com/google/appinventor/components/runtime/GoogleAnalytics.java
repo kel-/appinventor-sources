@@ -49,7 +49,6 @@ public class GoogleAnalytics extends AndroidNonvisibleComponent implements Compo
     super(container.$form());
     form.registerForOnStop(this);
     form = container.$form();
-    //uaTrackingID = retrieveUA(); //must receive UA to place into analytics.xml
   }
 
  /**
